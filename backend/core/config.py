@@ -6,7 +6,7 @@
 import os
 from pathlib import Path
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, AliasChoices
+from pydantic import BaseModel, Field, AliasChoices, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class APISettings(BaseModel):
@@ -60,6 +60,22 @@ class Settings(BaseSettings):
     log_level: str = Field(default='INFO', validation_alias=AliasChoices('LOG_LEVEL'))
     log_format: str = Field(default='%(asctime)s - %(name)s - %(levelname)s - %(message)s', validation_alias=AliasChoices('LOG_FORMAT'))
     log_file: str = Field(default='backend.log', validation_alias=AliasChoices('LOG_FILE'))
+
+    @field_validator('debug', mode='before')
+    @classmethod
+    def _parse_debug(cls, value):
+        """Tolerate unexpected DEBUG env values from the host machine."""
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return True
+
+        normalized = str(value).strip().lower()
+        if normalized in {'1', 'true', 'yes', 'on'}:
+            return True
+        if normalized in {'0', 'false', 'no', 'off'}:
+            return False
+        return True
 
 # 全局配置实例
 settings = Settings()

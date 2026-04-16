@@ -14,7 +14,7 @@ from backend.models.project import Project, ProjectStatus
 from backend.models.task import Task, TaskStatus
 from backend.services.progress_update_service import progress_update_service
 # from backend.services.pipeline_adapter import PipelineAdapter  # 临时注释，文件不存在
-from backend.utils.task_submission_utils import submit_video_pipeline_task
+from backend.utils.task_submission_helper import submit_video_pipeline_task
 
 logger = logging.getLogger(__name__)
 

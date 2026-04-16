@@ -10,7 +10,7 @@ from celery import Celery
 from backend.core.database import get_db
 from backend.services.project_service import ProjectService
 from backend.utils.thumbnail_generator import generate_project_thumbnail
-from backend.utils.task_submission_utils import submit_video_pipeline_task
+from backend.utils.task_submission_helper import submit_video_pipeline_task
 
 logger = logging.getLogger(__name__)
 

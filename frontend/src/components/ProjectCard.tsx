@@ -274,7 +274,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
       case 'completed': return 'success'
       case 'processing': return 'processing'
       case 'error': return 'error'
-      case 'uploading': return 'default'
       default: return 'default'
     }
   }

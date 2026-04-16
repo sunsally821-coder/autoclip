@@ -4,8 +4,7 @@
 """
 
 import logging
-from typing import Dict, Any, Optional
-from ..core.celery_app import celery_app
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +29,12 @@ def submit_video_pipeline_task(project_id: str, input_video_path: str, input_srt
         logger.info(f"任务参数: {[project_id, input_video_path, input_srt_path]}")
         
         try:
-            celery_task = celery_app.send_task(
-                'backend.tasks.processing.process_video_pipeline',
-                args=[project_id, input_video_path, input_srt_path]
+            from ..tasks.processing import process_video_pipeline
+
+            celery_task = process_video_pipeline.delay(
+                project_id=project_id,
+                input_video_path=input_video_path,
+                input_srt_path=input_srt_path
             )
             
             logger.info(f"视频流水线任务已提交: {celery_task.id}")

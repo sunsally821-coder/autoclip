@@ -16,17 +16,21 @@ export const ProjectTaskManager: React.FC<ProjectTaskManagerProps> = ({
   projectId, 
   projectName 
 }) => {
-  const { getAllTasks, loading } = useTaskStatus()
+  const { tasks, loading, loadProjectTasks } = useTaskStatus()
   const [selectedTask, setSelectedTask] = useState<TaskStatusType | null>(null)
   const [taskDetailVisible, setTaskDetailVisible] = useState(false)
 
+  useEffect(() => {
+    void loadProjectTasks(projectId)
+  }, [loadProjectTasks, projectId])
+
   // 获取当前项目的任务
-  const projectTasks = getAllTasks().filter(task => task.project_id === projectId)
-  const activeTasks = projectTasks.filter(task => 
+  const projectTasks = tasks.filter((task: TaskStatusType) => task.project_id === projectId)
+  const activeTasks = projectTasks.filter((task: TaskStatusType) => 
     task.status === 'running' || task.status === 'pending'
   )
-  const completedTasks = projectTasks.filter(task => task.status === 'completed')
-  const failedTasks = projectTasks.filter(task => task.status === 'failed')
+  const completedTasks = projectTasks.filter((task: TaskStatusType) => task.status === 'completed')
+  const failedTasks = projectTasks.filter((task: TaskStatusType) => task.status === 'failed')
 
   // 刷新任务列表
   const handleRefresh = () => {
@@ -237,7 +241,7 @@ export const ProjectTaskManager: React.FC<ProjectTaskManagerProps> = ({
           title={`活跃任务 (${activeTasks.length})`}
         >
           <Space wrap>
-            {activeTasks.map(task => (
+            {activeTasks.map((task: TaskStatusType) => (
               <div key={task.id} style={{ marginBottom: '8px' }}>
                 <Text>{task.message || task.id}</Text>
                 <Progress percent={task.progress} size="small" />

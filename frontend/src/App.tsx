@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Layout } from 'antd'
 import HomePage from './pages/HomePage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
-import SettingsPage from './pages/SettingsPage'
+import SettingsPage from './pages/SettingsPageRoute'
 import Header from './components/Header'
 
 const { Content } = Layout

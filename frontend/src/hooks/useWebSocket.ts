@@ -49,6 +49,10 @@ export interface TaskProgressUpdateMessage extends WebSocketMessage {
   snapshot?: boolean; // 标记是否为快照消息
 }
 
+interface HeartbeatMessage extends WebSocketMessage {
+  type: 'ping' | 'pong';
+}
+
 export type WebSocketEventMessage = 
   | TaskUpdateMessage 
   | ProjectUpdateMessage 
@@ -154,10 +158,10 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
       const ws = new WebSocket(wsUrl);
       globalWs = ws;
       globalUserId = userId;
-      globalOnMessage = onMessage;
-      globalOnConnect = onConnect;
-      globalOnDisconnect = onDisconnect;
-      globalOnError = onError;
+      globalOnMessage = onMessage ?? null;
+      globalOnConnect = onConnect ?? null;
+      globalOnDisconnect = onDisconnect ?? null;
+      globalOnError = onError ?? null;
 
       ws.onopen = () => {
         console.log('WebSocket连接已建立');
@@ -182,7 +186,7 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
 
       ws.onmessage = (event) => {
         try {
-          const data: WebSocketEventMessage = JSON.parse(event.data);
+          const data: WebSocketEventMessage | HeartbeatMessage = JSON.parse(event.data);
           console.log('收到WebSocket消息:', data);
           
           // 处理pong响应
@@ -195,7 +199,9 @@ export const useWebSocket = (options: UseWebSocketOptions) => {
             return;
           }
           
-          globalOnMessage?.(data);
+          if (data.type !== 'ping') {
+            globalOnMessage?.(data as WebSocketEventMessage);
+          }
         } catch (error) {
           console.error('解析WebSocket消息失败:', error);
         }

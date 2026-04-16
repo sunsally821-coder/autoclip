@@ -120,12 +120,9 @@ const BilibiliDownload: React.FC<BilibiliDownloadProps> = ({ onDownloadSuccess }
     setError('') // 清除之前的错误信息
     
     try {
-      let response
-      if (videoType === 'bilibili') {
-        response = await bilibiliApi.parseVideoInfo(url.trim(), selectedBrowser)
-      } else if (videoType === 'youtube') {
-        response = await bilibiliApi.parseYouTubeVideoInfo(url.trim(), selectedBrowser)
-      }
+      const response = videoType === 'bilibili'
+        ? await bilibiliApi.parseVideoInfo(url.trim(), selectedBrowser)
+        : await bilibiliApi.parseYouTubeVideoInfo(url.trim(), selectedBrowser)
       
       const parsedVideoInfo = response.video_info
       

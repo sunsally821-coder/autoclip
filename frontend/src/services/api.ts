@@ -318,7 +318,7 @@ export const projectApi = {
   // 更新合集信息
   updateCollection: (_projectId: string, collectionId: string, updates: Partial<Collection>): Promise<Collection> => {
     // 如果updates包含clip_ids，需要将其包装在metadata中
-    const apiUpdates = { ...updates }
+    const apiUpdates: Partial<Collection> & { metadata?: { clip_ids: string[] } } = { ...updates }
     if ('clip_ids' in updates && updates.clip_ids !== undefined) {
       apiUpdates.metadata = { clip_ids: updates.clip_ids }
       delete apiUpdates.clip_ids

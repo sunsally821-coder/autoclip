@@ -17,6 +17,14 @@ venv/
 env/
 .venv/
 
+# 前端依赖与构建产物
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+frontend/.vite/
+frontend/*.log
+
 # 视频和媒体文件
 *.mp4
 *.mkv

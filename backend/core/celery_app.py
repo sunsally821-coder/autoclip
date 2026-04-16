@@ -6,13 +6,50 @@ Celery应用配置
 import os
 from celery import Celery
 from celery.schedules import crontab
+
 from pathlib import Path
+
+
+def _to_bool(value: object, default: bool = False) -> bool:
+    """Convert common env-style values to bool."""
+    if value is None:
+        return default
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _read_local_env() -> dict[str, str]:
+    """Read simple KEY=VALUE pairs from the repo .env file."""
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    values: dict[str, str] = {}
+    if not env_path.exists():
+        return values
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip().strip("\"'")
+
+    return values
 
 # 设置默认配置模块
 # os.environ.setdefault('CELERY_CONFIG_MODULE', 'backend.core.celery_app')
 
 # 创建Celery应用
 celery_app = Celery('autoclip')
+
+LOCAL_ENV = _read_local_env()
+
+DEBUG_MODE = _to_bool(os.getenv('DEBUG'), default=_to_bool(LOCAL_ENV.get('DEBUG'), True))
+DEFAULT_REDIS_URL = os.getenv('REDIS_URL') or LOCAL_ENV.get('REDIS_URL') or 'redis://localhost:6379/0'
+LOCAL_EAGER_MODE = _to_bool(os.getenv('CELERY_ALWAYS_EAGER'), default=DEBUG_MODE)
 
 # 配置Celery
 class CeleryConfig:
@@ -26,12 +63,13 @@ class CeleryConfig:
     enable_utc = True
     
     # Redis配置
-    broker_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-    result_backend = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    broker_url = 'memory://' if LOCAL_EAGER_MODE else DEFAULT_REDIS_URL
+    result_backend = 'cache+memory://' if LOCAL_EAGER_MODE else DEFAULT_REDIS_URL
     
     # 任务配置
-    task_always_eager = os.getenv('CELERY_ALWAYS_EAGER', 'False').lower() == 'true'  # 生产环境异步执行
+    task_always_eager = LOCAL_EAGER_MODE
     task_eager_propagates = True
+    task_store_eager_result = LOCAL_EAGER_MODE
     
     # 工作进程配置
     worker_prefetch_multiplier = 1
